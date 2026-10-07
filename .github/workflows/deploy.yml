@@ -50,3 +50,23 @@ jobs:
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ./app
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+      
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig \
+            --region us-east-1 \
+            --name devops-assessment-eks
+
+      - name: Deploy to EKS
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: it-vedant-app
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          kubectl apply -f k8s/deployment.yaml
+          kubectl apply -f k8s/service.yaml
+
+          kubectl set image deployment/it-vedant-app \
+            app=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+          kubectl rollout status deployment/it-vedant-app
