@@ -60,7 +60,7 @@ jobs:
       - name: Deploy to EKS
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: it-vedant-app
+          ECR_REPOSITORY: devops-assessment-vedant
           IMAGE_TAG: ${{ github.sha }}
         run: |
           kubectl apply -f k8s/deployment.yaml
